@@ -1,0 +1,31 @@
+version: '3.8' # Specifies the Docker Compose file format version
+
+services:
+  electricity-calculator-web:
+    # Option 1: Build from the local Dockerfile
+    # This is useful for local development if you are making changes to the Dockerfile or app code.
+    build:
+      context: . # Use the current directory as the build context (where Dockerfile is)
+      dockerfile: Dockerfile # Specifies the name of the Dockerfile
+    
+    # Option 2: Use an existing image from a registry (e.g., GitHub Container Registry)
+    # Uncomment the line below and comment out the 'build' section above if you want to use a pre-built image.
+    # Make sure to replace 'YOUR_USERNAME/YOUR_REPOSITORY' with your actual GHCR path.
+    # image: ghcr.io/YOUR_USERNAME/electricity-calculator-app:latest
+
+    container_name: electricity_calculator_nginx # A friendly name for the running container
+    
+    ports:
+      - "8080:80" # Maps port 8080 on the host to port 80 on the container (Nginx default HTTP port)
+      # You can change "8080" to any other available port on your host machine if needed.
+
+    restart: unless-stopped # Optional: Configures the container to restart automatically unless manually stopped.
+                           # Other options include 'no', 'on-failure', 'always'.
+
+# Optional: Define named volumes if your application needed persistent storage (not needed for this static site)
+# volumes:
+#   my-app-data:
+
+# Optional: Define networks if you need custom networking (not needed for this simple setup)
+# networks:
+#   my-app-network:
