@@ -4,14 +4,14 @@ services:
   electricity-calculator-web:
     # Option 1: Build from the local Dockerfile
     # This is useful for local development if you are making changes to the Dockerfile or app code.
-    build:
-      context: . # Use the current directory as the build context (where Dockerfile is)
-      dockerfile: Dockerfile # Specifies the name of the Dockerfile
+    #build:
+    #  context: . # Use the current directory as the build context (where Dockerfile is)
+    #  dockerfile: Dockerfile # Specifies the name of the Dockerfile
     
     # Option 2: Use an existing image from a registry (e.g., GitHub Container Registry)
     # Uncomment the line below and comment out the 'build' section above if you want to use a pre-built image.
     # Make sure to replace 'YOUR_USERNAME/YOUR_REPOSITORY' with your actual GHCR path.
-    # image: ghcr.io/YOUR_USERNAME/electricity-calculator-app:latest
+    image: ghcr.io/dnviti/electricity-calculator-app:latest
 
     container_name: electricity_calculator_nginx # A friendly name for the running container
     
