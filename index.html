@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolatore Costi Elettricità</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Sfondo grigio-blu chiaro */
+        }
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .input-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4a5568; /* Grigio-700 */
+            margin-bottom: 0.5rem;
+        }
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0; /* Grigio-300 */
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease-in-out;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #4299e1; /* Blu-500 */
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+        }
+        .btn-primary {
+            background-color: #4299e1; /* Blu-500 */
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            transition: background-color 0.2s ease-in-out;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #3182ce; /* Blu-600 */
+        }
+        .output-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c5282; /* Blu-800 */
+        }
+        .output-label {
+            font-size: 0.875rem;
+            color: #718096; /* Grigio-500 */
+        }
+        #errorMessage {
+            color: #e53e3e; /* Rosso-600 */
+            background-color: #fed7d7; /* Rosso-200 */
+            border: 1px solid #f56565; /* Rosso-400 */
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6">
+
+    <div class="w-full max-w-3xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Calcolo Consumi e Costi Elettricità</h1>
+            <p class="text-gray-600 mt-2">Stima il tuo consumo energetico e i relativi costi con una simulazione realistica.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Scheda Input -->
+            <div class="card">
+                <h2 class="text-xl font-semibold text-gray-700 mb-6">Inserisci i Dati</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="power" class="input-label block">Potenza Media (Watt)</label>
+                        <input type="number" id="power" class="input-field" placeholder="es. 100" value="100">
+                    </div>
+                    
+                    <div>
+                        <label for="cost" class="input-label block">Costo per kWh (€, $, ecc.)</label>
+                        <input type="number" id="cost" class="input-field" placeholder="es. 0,25" value="0.25" step="0.01"> <!-- Aggiornato placeholder per formato italiano -->
+                    </div>
+                    
+                    <div>
+                        <label for="time" class="input-label block">Durata (Ore)</label>
+                        <input type="number" id="time" class="input-field" placeholder="es. 24" value="24">
+                    </div>
+                </div>
+
+                <button id="calculateBtn" class="btn-primary w-full mt-8">Calcola</button>
+                <div id="errorMessage" class="hidden mt-4"></div>
+            </div>
+
+            <!-- Scheda Output -->
+            <div class="card">
+                <h2 class="text-xl font-semibold text-gray-700 mb-6">Risultati Stimati</h2>
+                <div class="space-y-6">
+                    <div class="text-center">
+                        <p id="energyConsumed" class="output-value">--</p>
+                        <p class="output-label">Energia Totale Consumata</p>
+                    </div>
+                    <div class="text-center">
+                        <p id="totalCost" class="output-value">--</p>
+                        <p class="output-label">Costo Totale Stimato</p>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-6 text-center">
+                    Nota: il consumo è simulato con leggere fluttuazioni (±20%) rispetto alla potenza media, per una stima più realistica.
+                </p>
+            </div>
+        </div>
+
+        <!-- Scheda Grafico -->
+        <div class="card mt-6 w-full">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Andamento del Consumo Energetico Simulato</h2>
+            <div class="relative h-64 sm:h-80">
+                <canvas id="consumptionChart"></canvas>
+            </div>
+             <p id="chartMessage" class="text-sm text-gray-500 mt-4 text-center hidden">Premi "Calcola" per generare il grafico.</p>
+        </div>
+
+        <footer class="text-center mt-8 text-sm text-gray-500">
+            <p>&copy; 2024 Calcolatore Energetico. Solo a scopo illustrativo.</p>
+        </footer>
+    </div>
+
+    <script>
+        const powerInput = document.getElementById('power');
+        const costInput = document.getElementById('cost');
+        const timeInput = document.getElementById('time');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const energyConsumedOutput = document.getElementById('energyConsumed');
+        const totalCostOutput = document.getElementById('totalCost');
+        const consumptionChartCanvas = document.getElementById('consumptionChart');
+        const errorMessageDiv = document.getElementById('errorMessage');
+        const chartMessage = document.getElementById('chartMessage');
+        
+        let consumptionChart = null;
+
+        // Inizializza il messaggio del grafico
+        chartMessage.classList.remove('hidden');
+
+        function displayError(message) {
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.classList.remove('hidden');
+        }
+
+        function clearError() {
+            errorMessageDiv.classList.add('hidden');
+        }
+
+        calculateBtn.addEventListener('click', () => {
+            clearError();
+            chartMessage.classList.add('hidden');
+
+            const powerW = parseFloat(powerInput.value);
+            // Sostituisce la virgola con il punto per l'input del costo, se presente
+            const costString = costInput.value.replace(',', '.');
+            const costPerKwh = parseFloat(costString);
+            const totalHours = parseFloat(timeInput.value);
+
+            // --- Validazione Input ---
+            if (isNaN(powerW) || powerW <= 0) {
+                displayError("Inserisci un valore numerico positivo per la potenza.");
+                return;
+            }
+            if (isNaN(costPerKwh) || costPerKwh < 0) {
+                displayError("Inserisci un valore numerico valido (non negativo) per il costo per kWh.");
+                return;
+            }
+            if (isNaN(totalHours) || totalHours <= 0) {
+                displayError("Inserisci un valore numerico positivo per la durata.");
+                return;
+            }
+
+            // --- Parametri Simulazione ---
+            const numberOfIntervals = 60; // Numero di intervalli per il grafico/simulazione
+            const timePerIntervalHours = totalHours / numberOfIntervals;
+            const fluctuationPercentage = 0.20; // Fluttuazione ±20%
+
+            let simulatedPowerDataW = [];
+            let timeLabels = [];
+            let totalSimulatedEnergyWh = 0;
+
+            // --- Simula Consumo ---
+            for (let i = 0; i < numberOfIntervals; i++) {
+                // Fluttuazione: numero casuale tra -1 e 1, poi scalato per la percentuale
+                const randomFluctuationFactor = (Math.random() * 2 - 1) * fluctuationPercentage;
+                let intervalPowerW = powerW * (1 + randomFluctuationFactor);
+                intervalPowerW = Math.max(0, intervalPowerW); // Assicura che la potenza non sia negativa
+
+                simulatedPowerDataW.push(intervalPowerW.toFixed(2));
+                
+                // Calcola l'energia per questo intervallo e aggiungila al totale
+                const energyInIntervalWh = intervalPowerW * timePerIntervalHours;
+                totalSimulatedEnergyWh += energyInIntervalWh;
+
+                // Crea etichette temporali per il grafico
+                timeLabels.push(((i + 1) * timePerIntervalHours).toFixed(1) + 'h');
+            }
+
+            // --- Calcola Costo Totale ---
+            const totalSimulatedEnergyKWh = totalSimulatedEnergyWh / 1000;
+            const finalTotalCost = totalSimulatedEnergyKWh * costPerKwh;
+
+            // --- Mostra Risultati ---
+            // Formatta l'energia consumata con unità appropriate
+            let formattedEnergy;
+            if (totalSimulatedEnergyWh < 1000) {
+                formattedEnergy = totalSimulatedEnergyWh.toFixed(2) + " Wh";
+            } else if (totalSimulatedEnergyWh < 1000000) {
+                formattedEnergy = (totalSimulatedEnergyWh / 1000).toFixed(3) + " kWh";
+            } else {
+                formattedEnergy = (totalSimulatedEnergyWh / 1000000).toFixed(4) + " MWh";
+            }
+            energyConsumedOutput.textContent = formattedEnergy;
+            // Formatta il costo con due decimali e la virgola come separatore decimale per la visualizzazione
+            totalCostOutput.textContent = finalTotalCost.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+
+            // --- Aggiorna Grafico ---
+            if (consumptionChart) {
+                consumptionChart.destroy(); // Distrugge l'istanza precedente del grafico
+            }
+
+            consumptionChart = new Chart(consumptionChartCanvas, {
+                type: 'line',
+                data: {
+                    labels: timeLabels,
+                    datasets: [{
+                        label: 'Potenza Simulata (Watt)',
+                        data: simulatedPowerDataW,
+                        borderColor: '#4299e1', 
+                        backgroundColor: 'rgba(66, 153, 225, 0.1)', 
+                        tension: 0.3, // Leviga la linea
+                        fill: true,
+                        pointRadius: 2,
+                        pointHoverRadius: 5,
+                    },
+                    { 
+                        label: 'Potenza Media Inserita (Watt)',
+                        data: Array(numberOfIntervals).fill(powerW),
+                        borderColor: '#f56565', 
+                        borderDash: [5, 5], // Linea tratteggiata
+                        tension: 0.1,
+                        fill: false,
+                        pointRadius: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Potenza (Watt)',
+                                font: { size: 14, weight: '500' },
+                                color: '#4a5568'
+                            },
+                            grid: {
+                                color: '#e2e8f0' // Linee della griglia più chiare
+                            },
+                            ticks: {
+                                color: '#718096'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Durata (Ore)',
+                                font: { size: 14, weight: '500' },
+                                color: '#4a5568'
+                            },
+                             grid: {
+                                display: false // Nasconde le linee della griglia sull'asse x per un aspetto più pulito
+                            },
+                            ticks: {
+                                color: '#718096',
+                                maxRotation: 45,
+                                minRotation: 0,
+                                autoSkip: true, // Salta automaticamente le etichette se troppe
+                                maxTicksLimit: 15 
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { size: 12 },
+                                color: '#4a5568'
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0,0,0,0.75)',
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        // Formatta il valore nel tooltip con la virgola come separatore decimale
+                                        label += parseFloat(context.parsed.y).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' W';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 800, // Durata animazione in ms
+                        easing: 'easeInOutQuart' // Funzione di easing per l'animazione
+                    }
+                }
+            });
+        });
+
+        // Mostra il messaggio del grafico all'avvio se i campi sono vuoti
+        if (!powerInput.value || !costInput.value || !timeInput.value) {
+             chartMessage.classList.remove('hidden');
+        } else {
+            // Opzionalmente, si potrebbe attivare un calcolo al caricamento:
+            // calculateBtn.click(); 
+            // Per ora, assicuriamoci che il messaggio sia mostrato fino al primo calcolo
+            if (!consumptionChart) { // Se il grafico non è ancora stato disegnato
+                 chartMessage.classList.remove('hidden');
+            }
+        }
+
+    </script>
+</body>
+</html>
