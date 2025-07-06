@@ -387,7 +387,8 @@
             } else if (button.classList.contains('cancel-btn')) {
                 specificUtilities[index].isEditing = false;
             } else if (button.classList.contains('save-btn')) {
-                const parentDiv = button.closest('.flex');
+                // FIX: Correctly select the parent container of the inputs
+                const parentDiv = button.closest('.flex.flex-col');
                 const newName = parentDiv.querySelector('.edit-input-name').value.trim();
                 const newConsumption = parseFloat(parentDiv.querySelector('.edit-input-consumption').value);
                 
