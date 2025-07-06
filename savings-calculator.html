@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolatore di Risparmio Fotovoltaico (Completo)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .card-shadow {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .action-btn:hover {
+            opacity: 0.8;
+        }
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-3xl bg-white rounded-2xl card-shadow overflow-hidden">
+        <div class="p-6 md:p-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800 text-center mb-2">Calcolatore Economico Fotovoltaico</h1>
+            <p class="text-gray-600 text-center mb-6 md:mb-8">Analizza costi, risparmi e guadagni del tuo impianto solare.</p>
+
+            <!-- Sezione Input Principali -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="consumoTotale" class="block text-sm font-medium text-gray-700 mb-1">Consumo Totale Casa (kWh)</label>
+                    <input type="number" id="consumoTotale" placeholder="Es. 450" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                 <div>
+                    <label for="consumoRete" class="block text-sm font-medium text-gray-700 mb-1">Consumo dalla Rete (kWh)</label>
+                    <input type="number" id="consumoRete" placeholder="Es. 150" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                <div>
+                    <label for="energiaImmessa" class="block text-sm font-medium text-gray-700 mb-1">Energia Immessa in Rete (kWh)</label>
+                    <input type="number" id="energiaImmessa" placeholder="Es. 100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                <div>
+                    <label for="costoKwh" class="block text-sm font-medium text-gray-700 mb-1">Costo Acquisto kWh (€)</label>
+                    <input type="number" id="costoKwh" step="0.01" placeholder="Es. 0.25" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                <div class="md:col-span-2">
+                    <label for="prezzoVendita" class="block text-sm font-medium text-gray-700 mb-1">Prezzo Vendita kWh (€)</label>
+                    <input type="number" id="prezzoVendita" step="0.01" placeholder="Es. 0.10" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+            </div>
+            
+            <!-- Sezione Gestione Gruppi -->
+            <div class="border-t pt-6 mb-6">
+                 <h3 class="text-lg font-semibold text-gray-700 mb-4 text-center">Gestione Gruppi di Utenze</h3>
+                 <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                        <div>
+                            <label for="groupNameInput" class="block text-sm font-medium text-gray-700 mb-1">Nome Nuovo Gruppo</label>
+                            <input type="text" id="groupNameInput" placeholder="Es. Utenze Notturne" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        </div>
+                        <button id="saveGroupBtn" class="w-full bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg action-btn transition-colors">Salva Lista Corrente come Gruppo</button>
+                    </div>
+                    <div class="border-t my-4"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div class="md:col-span-2">
+                            <label for="groupSelect" class="block text-sm font-medium text-gray-700 mb-1">Gruppi Salvati</label>
+                            <select id="groupSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"></select>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="loadGroupBtn" class="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg action-btn transition-colors">Carica</button>
+                            <button id="deleteGroupBtn" class="w-full bg-red-500 text-white font-semibold py-2 px-4 rounded-lg action-btn transition-colors">Elimina</button>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+
+            <!-- Sezione Utenze Specifiche -->
+            <div class="border-t pt-6">
+                 <h3 class="text-lg font-semibold text-gray-700 mb-4 text-center">Aggiungi Utenze Specifiche (Opzionale)</h3>
+                 <div class="flex flex-col md:flex-row gap-4 items-end mb-4">
+                     <div class="flex-grow w-full">
+                         <label for="nomeUtenza" class="block text-sm font-medium text-gray-700 mb-1">Nome Utenza</label>
+                         <input type="text" id="nomeUtenza" placeholder="Es. Auto Elettrica" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                     </div>
+                     <div class="flex-grow w-full md:w-auto">
+                         <label for="consumoUtenza" class="block text-sm font-medium text-gray-700 mb-1">Consumo (kWh)</label>
+                         <input type="number" id="consumoUtenza" placeholder="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                     </div>
+                     <button id="addUtenzaBtn" class="w-full md:w-auto bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all">Aggiungi</button>
+                 </div>
+                 <div id="listaUtenze" class="space-y-2">
+                    <!-- Le utenze aggiunte verranno mostrate qui -->
+                 </div>
+            </div>
+
+            <!-- Pulsante di Calcolo -->
+            <div class="text-center mt-8">
+                <button id="calcolaBtn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105">
+                    Calcola Bilancio
+                </button>
+            </div>
+             <!-- Messaggio di Errore -->
+            <div id="error-message" class="hidden mt-4 text-center text-red-600 font-medium p-3 bg-red-100 rounded-lg"></div>
+        </div>
+
+        <!-- Sezione Risultati -->
+        <div id="risultati" class="hidden bg-gray-50 p-6 md:p-8 border-t border-gray-200">
+            
+            <!-- Riepilogo Economico -->
+            <div class="mb-8">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800 text-center mb-6">Riepilogo Economico</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                    <div class="bg-white p-4 rounded-lg border border-red-200">
+                        <p class="text-sm text-gray-500">Costo dalla Rete</p>
+                        <p id="costoRete" class="text-2xl font-bold text-red-600">-</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-green-200">
+                        <p class="text-sm text-gray-500">Risparmio Autoconsumo</p>
+                        <p id="risparmioFV" class="text-2xl font-bold text-green-600">-</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-yellow-400">
+                        <p class="text-sm text-gray-500">Guadagno Immissione</p>
+                        <p id="guadagnoImmissione" class="text-2xl font-bold text-yellow-600">-</p>
+                    </div>
+                    <div id="bilancioCard" class="bg-white p-4 rounded-lg border-2">
+                        <p class="text-sm font-semibold">Bilancio Finale</p>
+                        <p id="bilancioFinale" class="text-2xl font-bold">-</p>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Riepilogo Energetico -->
+            <div class="mb-8 pt-6 border-t">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800 text-center mb-6">Riepilogo Energetico (kWh)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                    <div class="bg-white p-4 rounded-lg border">
+                        <p class="text-sm text-gray-500">Energia Autoconsumata</p>
+                        <p id="energiaFV" class="text-2xl font-bold text-blue-600">-</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border">
+                        <p class="text-sm text-gray-500">Energia da Rete</p>
+                        <p id="energiaRete" class="text-2xl font-bold text-red-600">-</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border">
+                        <p class="text-sm text-gray-500">Energia Immessa</p>
+                        <p id="energiaImmessaOut" class="text-2xl font-bold text-yellow-600">-</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border">
+                        <p class="text-sm text-gray-500">Totale Prodotto da FV</p>
+                        <p id="energiaProdotta" class="text-2xl font-bold text-green-600">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analisi Costi Utenze Specifiche -->
+            <div id="analisi-costi-specifica" class="hidden mb-8 pt-6 border-t">
+                 <h3 class="text-lg font-semibold text-gray-700 mb-4 text-center">Analisi Costi Utenze Specifiche</h3>
+                 <div id="lista-costi-utenze" class="space-y-3">
+                    <!-- I costi delle utenze verranno mostrati qui -->
+                 </div>
+            </div>
+
+            <!-- Grafico Ripartizione Fonti -->
+            <div class="pt-6 border-t">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3 text-center">Ripartizione Fonti Energetiche (Consumo Casa)</h3>
+                <div class="w-full bg-gray-200 rounded-full h-8 overflow-hidden flex">
+                    <div id="barraRete" class="bg-red-500 h-full flex items-center justify-center text-white text-sm font-medium transition-all duration-500" style="width: 0%;"></div>
+                    <div id="barraFV" class="bg-green-500 h-full flex items-center justify-center text-white text-sm font-medium transition-all duration-500" style="width: 0%;"></div>
+                </div>
+                <div class="flex justify-between mt-2 text-sm">
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                        <span id="percentualeRete">Dalla Rete: -%</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                        <span id="percentualeFV">Da Fotovoltaico: -%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Grafico Incidenza Consumi -->
+            <div id="grafico-specifica" class="hidden mt-8 pt-6 border-t">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3 text-center">Incidenza Utenze sui Consumi Totali</h3>
+                <div class="w-full bg-gray-200 rounded-full h-8 overflow-hidden flex">
+                    <div id="barraSpecifica" class="bg-purple-600 h-full flex items-center justify-center text-white text-sm font-medium transition-all duration-500" style="width: 0%;"></div>
+                    <div id="barraAltri" class="bg-gray-400 h-full flex items-center justify-center text-white text-sm font-medium transition-all duration-500" style="width: 0%;"></div>
+                </div>
+                <div class="flex justify-between mt-2 text-sm">
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 bg-purple-600 rounded-full mr-2"></span>
+                        <span id="percentualeSpecifica">Totale Utenze Specifiche: -%</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 bg-gray-400 rounded-full mr-2"></span>
+                        <span id="percentualeAltri">Altri Consumi: -%</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- STATE MANAGEMENT ---
+        let specificUtilities = [];
+        let utilityGroups = [];
+
+        // --- DOM REFERENCES ---
+        // Inputs
+        const consumoTotaleInput = document.getElementById('consumoTotale');
+        const consumoReteInput = document.getElementById('consumoRete');
+        const energiaImmessaInput = document.getElementById('energiaImmessa');
+        const costoKwhInput = document.getElementById('costoKwh');
+        const prezzoVenditaInput = document.getElementById('prezzoVendita');
+        // Utenze
+        const nomeUtenzaInput = document.getElementById('nomeUtenza');
+        const consumoUtenzaInput = document.getElementById('consumoUtenza');
+        const addUtenzaBtn = document.getElementById('addUtenzaBtn');
+        const listaUtenzeDiv = document.getElementById('listaUtenze');
+        // Gruppi
+        const groupNameInput = document.getElementById('groupNameInput');
+        const saveGroupBtn = document.getElementById('saveGroupBtn');
+        const groupSelect = document.getElementById('groupSelect');
+        const loadGroupBtn = document.getElementById('loadGroupBtn');
+        const deleteGroupBtn = document.getElementById('deleteGroupBtn');
+        // Buttons & Messages
+        const calcolaBtn = document.getElementById('calcolaBtn');
+        const risultatiDiv = document.getElementById('risultati');
+        const errorMessageDiv = document.getElementById('error-message');
+        // Results Sections
+        const costoReteEl = document.getElementById('costoRete');
+        const risparmioFVEl = document.getElementById('risparmioFV');
+        const guadagnoImmissioneEl = document.getElementById('guadagnoImmissione');
+        const bilancioFinaleEl = document.getElementById('bilancioFinale');
+        const bilancioCardEl = document.getElementById('bilancioCard');
+        const energiaFVEl = document.getElementById('energiaFV');
+        const energiaReteEl = document.getElementById('energiaRete');
+        const energiaImmessaOutEl = document.getElementById('energiaImmessaOut');
+        const energiaProdottaEl = document.getElementById('energiaProdotta');
+        const analisiCostiSpecificaDiv = document.getElementById('analisi-costi-specifica');
+        const listaCostiUtenzeDiv = document.getElementById('lista-costi-utenze');
+        // Graphs
+        const barraReteEl = document.getElementById('barraRete');
+        const barraFVEl = document.getElementById('barraFV');
+        const percentualeReteEl = document.getElementById('percentualeRete');
+        const percentualeFVEl = document.getElementById('percentualeFV');
+        const graficoSpecificaDiv = document.getElementById('grafico-specifica');
+        const barraSpecificaEl = document.getElementById('barraSpecifica');
+        const barraAltriEl = document.getElementById('barraAltri');
+        const percentualeSpecificaEl = document.getElementById('percentualeSpecifica');
+        const percentualeAltriEl = document.getElementById('percentualeAltri');
+
+        // --- FUNCTIONS ---
+        const renderUtilitiesList = () => {
+            listaUtenzeDiv.innerHTML = '';
+            if (specificUtilities.length === 0) {
+                listaUtenzeDiv.innerHTML = `<p class="text-center text-gray-500 text-sm">Nessuna utenza specifica aggiunta.</p>`;
+                return;
+            }
+            
+            specificUtilities.forEach((utenza, index) => {
+                const utenzaEl = document.createElement('div');
+                utenzaEl.className = 'bg-gray-100 p-3 rounded-lg';
+                
+                if (utenza.isEditing) {
+                    utenzaEl.innerHTML = `
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" value="${utenza.name}" data-type="name" data-index="${index}" class="edit-input-name w-full px-2 py-1 border border-gray-300 rounded-md" placeholder="Nome Utenza">
+                            <input type="number" value="${utenza.consumption}" data-type="consumption" data-index="${index}" class="edit-input-consumption w-full sm:w-32 px-2 py-1 border border-gray-300 rounded-md" placeholder="kWh">
+                            <div class="flex gap-2 justify-end">
+                                <button data-index="${index}" class="save-btn action-btn bg-green-500 text-white text-xs font-bold py-1 px-3 rounded-md transition-colors">Salva</button>
+                                <button data-index="${index}" class="cancel-btn action-btn bg-gray-400 text-white text-xs font-bold py-1 px-3 rounded-md transition-colors">Annulla</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    utenzaEl.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-semibold text-gray-800">${utenza.name}</span>:
+                                <span class="text-gray-600">${utenza.consumption} kWh</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button data-index="${index}" class="edit-btn action-btn bg-blue-500 text-white text-xs font-bold py-1 px-3 rounded-md transition-colors">Modifica</button>
+                                <button data-index="${index}" class="remove-btn action-btn bg-red-500 text-white text-xs font-bold py-1 px-3 rounded-md transition-colors">Rimuovi</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                listaUtenzeDiv.appendChild(utenzaEl);
+            });
+        };
+
+        const addUtenza = () => {
+            const name = nomeUtenzaInput.value.trim();
+            const consumption = parseFloat(consumoUtenzaInput.value);
+
+            if (!name || isNaN(consumption) || consumption <= 0) {
+                alert('Per favore, inserisci un nome valido e un consumo positivo per l\'utenza.');
+                return;
+            }
+
+            specificUtilities.push({ name, consumption, isEditing: false });
+            nomeUtenzaInput.value = '';
+            consumoUtenzaInput.value = '';
+            nomeUtenzaInput.focus();
+            renderUtilitiesList();
+        };
+
+        const mostraErrore = (messaggio) => {
+            errorMessageDiv.textContent = messaggio;
+            errorMessageDiv.classList.remove('hidden');
+            risultatiDiv.classList.add('hidden');
+        };
+
+        const nascondiErrore = () => {
+            errorMessageDiv.classList.add('hidden');
+        };
+        
+        // --- STORAGE FUNCTIONS ---
+        const savePricesToStorage = () => {
+            localStorage.setItem('photovoltaicCalculator_costoKwh', costoKwhInput.value);
+            localStorage.setItem('photovoltaicCalculator_prezzoVendita', prezzoVenditaInput.value);
+        };
+
+        const loadPricesFromStorage = () => {
+            const storedCosto = localStorage.getItem('photovoltaicCalculator_costoKwh');
+            const storedPrezzo = localStorage.getItem('photovoltaicCalculator_prezzoVendita');
+            if (storedCosto) {
+                costoKwhInput.value = storedCosto;
+            }
+            if (storedPrezzo) {
+                prezzoVenditaInput.value = storedPrezzo;
+            }
+        };
+
+        const saveGroupsToStorage = () => {
+            localStorage.setItem('photovoltaicCalculatorGroups', JSON.stringify(utilityGroups));
+        };
+
+        const populateGroupSelect = () => {
+            groupSelect.innerHTML = '<option value="">-- Seleziona un gruppo --</option>';
+            utilityGroups.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group.groupName;
+                option.textContent = group.groupName;
+                groupSelect.appendChild(option);
+            });
+        };
+
+        const loadGroupsFromStorage = () => {
+            try {
+                const storedGroups = localStorage.getItem('photovoltaicCalculatorGroups');
+                if (storedGroups) {
+                    utilityGroups = JSON.parse(storedGroups);
+                    populateGroupSelect();
+                }
+            } catch (error) {
+                console.error("Errore nel caricamento dei gruppi dal localStorage:", error);
+                utilityGroups = [];
+            }
+        };
+
+        // --- EVENT LISTENERS ---
+        addUtenzaBtn.addEventListener('click', addUtenza);
+        costoKwhInput.addEventListener('input', savePricesToStorage);
+        prezzoVenditaInput.addEventListener('input', savePricesToStorage);
+
+
+        listaUtenzeDiv.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button) return;
+
+            const index = parseInt(button.dataset.index, 10);
+
+            if (button.classList.contains('remove-btn')) {
+                specificUtilities.splice(index, 1);
+            } else if (button.classList.contains('edit-btn')) {
+                specificUtilities.forEach((u, i) => u.isEditing = (i === index));
+            } else if (button.classList.contains('cancel-btn')) {
+                specificUtilities[index].isEditing = false;
+            } else if (button.classList.contains('save-btn')) {
+                const parentDiv = button.closest('.flex');
+                const newName = parentDiv.querySelector('.edit-input-name').value.trim();
+                const newConsumption = parseFloat(parentDiv.querySelector('.edit-input-consumption').value);
+                
+                if (newName && !isNaN(newConsumption) && newConsumption > 0) {
+                    specificUtilities[index].name = newName;
+                    specificUtilities[index].consumption = newConsumption;
+                    specificUtilities[index].isEditing = false;
+                } else {
+                    alert('Per favore, inserisci dati validi prima di salvare.');
+                }
+            }
+            renderUtilitiesList();
+        });
+
+        // Group Event Listeners
+        saveGroupBtn.addEventListener('click', () => {
+            const groupName = groupNameInput.value.trim();
+            if (!groupName) {
+                alert('Per favore, inserisci un nome per il gruppo.');
+                return;
+            }
+            if (specificUtilities.length === 0) {
+                alert('Aggiungi almeno un\'utenza alla lista prima di salvare un gruppo.');
+                return;
+            }
+
+            const existingGroupIndex = utilityGroups.findIndex(g => g.groupName === groupName);
+            if (existingGroupIndex !== -1) {
+                if (!confirm(`Un gruppo con nome "${groupName}" esiste già. Vuoi sovrascriverlo?`)) {
+                    return;
+                }
+            }
+
+            const cleanUtilities = specificUtilities.map(({ name, consumption }) => ({ name, consumption }));
+            const newGroup = { groupName, utilities: cleanUtilities };
+
+            if (existingGroupIndex !== -1) {
+                utilityGroups[existingGroupIndex] = newGroup;
+            } else {
+                utilityGroups.push(newGroup);
+            }
+
+            saveGroupsToStorage();
+            populateGroupSelect();
+            groupSelect.value = groupName;
+            groupNameInput.value = '';
+            alert(`Gruppo "${groupName}" salvato con successo!`);
+        });
+
+        loadGroupBtn.addEventListener('click', () => {
+            const selectedGroupName = groupSelect.value;
+            if (!selectedGroupName) {
+                alert('Per favore, seleziona un gruppo da caricare.');
+                return;
+            }
+            
+            const groupToLoad = utilityGroups.find(g => g.groupName === selectedGroupName);
+            if (groupToLoad) {
+                specificUtilities = groupToLoad.utilities.map(u => ({ ...u, isEditing: false }));
+                renderUtilitiesList();
+            }
+        });
+
+        deleteGroupBtn.addEventListener('click', () => {
+            const selectedGroupName = groupSelect.value;
+            if (!selectedGroupName) {
+                alert('Per favore, seleziona un gruppo da eliminare.');
+                return;
+            }
+
+            if (confirm(`Sei sicuro di voler eliminare il gruppo "${selectedGroupName}"?`)) {
+                utilityGroups = utilityGroups.filter(g => g.groupName !== selectedGroupName);
+                saveGroupsToStorage();
+                populateGroupSelect();
+            }
+        });
+
+
+        calcolaBtn.addEventListener('click', () => {
+            // 1. Read and Validate Inputs
+            const consumoTotale = parseFloat(consumoTotaleInput.value);
+            const consumoRete = parseFloat(consumoReteInput.value);
+            const energiaImmessa = parseFloat(energiaImmessaInput.value);
+            const costoKwh = parseFloat(costoKwhInput.value);
+            const prezzoVendita = parseFloat(prezzoVenditaInput.value);
+
+            if ([consumoTotale, consumoRete, energiaImmessa, costoKwh, prezzoVendita].some(isNaN) || consumoTotale <= 0 || costoKwh < 0 || prezzoVendita < 0) {
+                mostraErrore("Inserire valori validi. I consumi totali devono essere > 0. I prezzi non possono essere negativi.");
+                return;
+            }
+            if (consumoRete < 0 || energiaImmessa < 0) {
+                mostraErrore("I valori di consumo/immissione non possono essere negativi.");
+                return;
+            }
+            if (consumoRete > consumoTotale) {
+                mostraErrore("Il consumo dalla rete non può superare il consumo totale della casa.");
+                return;
+            }
+            const totalSpecificConsumption = specificUtilities.reduce((sum, u) => sum + u.consumption, 0);
+            if (totalSpecificConsumption > consumoTotale) {
+                mostraErrore("La somma dei consumi delle utenze specifiche non può superare il consumo totale della casa.");
+                return;
+            }
+            
+            nascondiErrore();
+
+            // 2. Core Calculations
+            const energiaAutoconsumata = consumoTotale - consumoRete;
+            const energiaProdottaTotale = energiaAutoconsumata + energiaImmessa;
+            const costoDaRete = consumoRete * costoKwh;
+            const risparmioDaFV = energiaAutoconsumata * costoKwh;
+            const guadagnoDaImmissione = energiaImmessa * prezzoVendita;
+            const bilancioFinale = risparmioDaFV + guadagnoDaImmissione - costoDaRete;
+
+            // 3. Update UI - Economic & Energy Summary
+            costoReteEl.textContent = `${costoDaRete.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' })}`;
+            risparmioFVEl.textContent = `${risparmioDaFV.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' })}`;
+            guadagnoImmissioneEl.textContent = `${guadagnoDaImmissione.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' })}`;
+            bilancioFinaleEl.textContent = `${bilancioFinale.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' })}`;
+            
+            bilancioCardEl.classList.toggle('border-green-400', bilancioFinale >= 0);
+            bilancioCardEl.classList.toggle('border-red-400', bilancioFinale < 0);
+            bilancioFinaleEl.classList.toggle('text-green-600', bilancioFinale >= 0);
+            bilancioFinaleEl.classList.toggle('text-red-600', bilancioFinale < 0);
+
+            energiaFVEl.textContent = `${energiaAutoconsumata.toFixed(2)} kWh`;
+            energiaReteEl.textContent = `${consumoRete.toFixed(2)} kWh`;
+            energiaImmessaOutEl.textContent = `${energiaImmessa.toFixed(2)} kWh`;
+            energiaProdottaEl.textContent = `${energiaProdottaTotale.toFixed(2)} kWh`;
+
+            // 4. Update UI - Specific Utilities Cost Analysis
+            if (specificUtilities.length > 0) {
+                const costoMedioKwhConsumato = consumoTotale > 0 ? costoDaRete / consumoTotale : 0;
+                listaCostiUtenzeDiv.innerHTML = '';
+                let costoTotaleUtenzeSpecifiche = 0;
+
+                specificUtilities.forEach(utenza => {
+                    const costoUtenza = utenza.consumption * costoMedioKwhConsumato;
+                    costoTotaleUtenzeSpecifiche += costoUtenza;
+                    const costoEl = document.createElement('div');
+                    costoEl.className = 'flex justify-between items-center bg-white p-3 rounded-lg border';
+                    costoEl.innerHTML = `
+                        <span class="font-medium text-gray-800">${utenza.name}</span>
+                        <span class="font-bold text-purple-700">${costoUtenza.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' })}</span>
+                    `;
+                    listaCostiUtenzeDiv.appendChild(costoEl);
+                });
+                
+                // Aggiungi la riga del totale
+                const totaleCostoEl = document.createElement('div');
+                totaleCostoEl.className = 'flex justify-between items-center bg-gray-200 p-3 rounded-lg border-t-2 border-gray-300 mt-3';
+                totaleCostoEl.innerHTML = `
+                    <span class="font-bold text-gray-800">Costo Totale Utenze</span>
+                    <span class="font-extrabold text-purple-800">${costoTotaleUtenzeSpecifiche.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' })}</span>
+                `;
+                listaCostiUtenzeDiv.appendChild(totaleCostoEl);
+
+                analisiCostiSpecificaDiv.classList.remove('hidden');
+            } else {
+                analisiCostiSpecificaDiv.classList.add('hidden');
+            }
+
+            // 5. Update UI - Graphs
+            const percRete = consumoTotale > 0 ? (consumoRete / consumoTotale) * 100 : 0;
+            const percFV = consumoTotale > 0 ? (energiaAutoconsumata / consumoTotale) * 100 : 0;
+            barraReteEl.style.width = `${percRete}%`;
+            barraFVEl.style.width = `${percFV}%`;
+            barraReteEl.textContent = percRete > 10 ? `${percRete.toFixed(1)}%` : '';
+            barraFVEl.textContent = percFV > 10 ? `${percFV.toFixed(1)}%` : '';
+            percentualeReteEl.textContent = `Dalla Rete: ${percRete.toFixed(1)}%`;
+            percentualeFVEl.textContent = `Da Fotovoltaico: ${percFV.toFixed(1)}%`;
+
+            if (totalSpecificConsumption > 0) {
+                graficoSpecificaDiv.classList.remove('hidden');
+                const altriConsumi = consumoTotale - totalSpecificConsumption;
+                const percSpecifica = (totalSpecificConsumption / consumoTotale) * 100;
+                const percAltri = (altriConsumi / consumoTotale) * 100;
+
+                barraSpecificaEl.style.width = `${percSpecifica}%`;
+                barraAltriEl.style.width = `${percAltri}%`;
+                barraSpecificaEl.textContent = percSpecifica > 10 ? `${percSpecifica.toFixed(1)}%` : '';
+                barraAltriEl.textContent = percAltri > 10 ? `${percAltri.toFixed(1)}%` : '';
+                percentualeSpecificaEl.textContent = `Utenze Specifiche: ${percSpecifica.toFixed(1)}% (${totalSpecificConsumption.toFixed(1)} kWh)`;
+                percentualeAltriEl.textContent = `Altri Consumi: ${percAltri.toFixed(1)}% (${altriConsumi.toFixed(1)} kWh)`;
+            } else {
+                graficoSpecificaDiv.classList.add('hidden');
+            }
+
+            // 6. Show Results
+            risultatiDiv.classList.remove('hidden');
+        });
+        
+        // --- INITIAL RENDER ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGroupsFromStorage();
+            loadPricesFromStorage();
+            renderUtilitiesList();
+        });
+
+    </script>
+</body>
+</html>

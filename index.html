@@ -2,709 +2,87 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calcolatore Costi Elettricità Avanzato</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Energy Calculator - Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
-        .card { background-color: white; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); padding: 1.5rem; margin-bottom: 1.5rem; }
-        .input-label { font-size: 0.875rem; font-weight: 500; color: #4a5568; margin-bottom: 0.5rem; }
-        .input-field, .select-field { width: 100%; padding: 0.75rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; transition: border-color 0.2s ease-in-out; background-color: white; }
-        .input-field:focus, .select-field:focus { outline: none; border-color: #4299e1; box-shadow: 0 0 0 3px rgba(66,153,225,0.5); }
-        .btn-primary { background-color: #4299e1; color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 8px; transition: background-color 0.2s ease-in-out; cursor: pointer; border: none; }
-        .btn-primary:hover { background-color: #3182ce; }
-        .output-value { font-size: 1.25rem; font-weight: 700; color: #2c5282; }
-        .output-label { font-size: 0.8rem; color: #718096; }
-        #errorMessage { color: #e53e3e; background-color: #fed7d7; border: 1px solid #f56565; padding: 0.75rem; border-radius: 8px; margin-top: 1rem; text-align: center; }
-        .optional-section { border-top: 1px dashed #cbd5e0; margin-top: 1rem; padding-top: 1rem; }
-        .checkbox-label { font-size: 0.9rem; font-weight: 500; color: #4a5568; margin-left: 0.5rem; }
-        .lang-selector { padding: 0.3rem 0.6rem; font-size: 0.8rem; margin-left: 0.5rem; border-radius: 6px; }
-        .device-schedule-section { border-top: 1px solid #e2e8f0; margin-top: 1rem; padding-top: 1rem; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background: #2d6cdf;
+            color: #fff;
+            padding: 1.5rem 0;
+            text-align: center;
+        }
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-container {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 2rem 2.5rem;
+            text-align: center;
+            transition: box-shadow 0.2s;
+        }
+        .card:hover {
+            box-shadow: 0 4px 16px rgba(45,108,223,0.15);
+        }
+        .card a {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.7rem 1.5rem;
+            background: #2d6cdf;
+            color: #fff;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .card a:hover {
+            background: #1b4e9b;
+        }
+        @media (max-width: 700px) {
+            .card-container {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6">
-
-    <div class="w-full max-w-4xl">
-        <header class="text-center mb-6 relative">
-            <div class="absolute top-0 right-0 mt-2 mr-2">
-                <select id="languageSelector" class="select-field lang-selector">
-                    <option value="it">Italiano</option>
-                    <option value="en">English</option>
-                </select>
+<body>
+    <header>
+        <h1>Energy Calculator</h1>
+        <p>Benvenuto! Scegli una funzione per iniziare:</p>
+    </header>
+    <main>
+        <div class="card-container">
+            <div class="card">
+                <h2>Calcolatore Risparmi</h2>
+                <p>Scopri quanto puoi risparmiare con il nostro calcolatore.</p>
+                <a href="savings-calculator.html">Vai al Calcolatore Risparmi</a>
             </div>
-            <h1 id="mainTitle" class="text-3xl sm:text-4xl font-bold text-gray-800 pt-8">Calcolo Avanzato Consumi e Costi Elettricità</h1>
-            <p id="subTitle" class="text-gray-600 mt-2">Includi fotovoltaico e batteria per una stima più completa.</p>
-        </header>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Colonna Input -->
-            <div class="lg:col-span-1 card">
-                <h2 id="dataInputTitle" class="text-xl font-semibold text-gray-700 mb-6">Inserisci i Dati</h2>
-                
-                <div class="space-y-3">
-                    <div>
-                        <label for="power" id="labelDevicePower" class="input-label block">Consumo Medio Dispositivo (Watt)</label>
-                        <input type="number" id="power" class="input-field" placeholder="es. 100" value="100">
-                    </div>
-                    <div class="device-schedule-section">
-                        <label for="deviceStartHour" id="labelDeviceStartHour" class="input-label block">Ora Inizio Funzionamento Dispositivo</label>
-                        <input type="number" id="deviceStartHour" class="input-field" placeholder="0-23 (es. 8)" value="8" min="0" max="23">
-                        
-                        <label for="deviceOperatingHours" id="labelDeviceOpHours" class="input-label block mt-2">Durata Funzionamento Dispositivo (Ore)</label>
-                        <input type="number" id="deviceOperatingHours" class="input-field" placeholder="1-24 (es. 10)" value="10" min="1">
-                    </div>
-
-                    <div>
-                        <label for="cost" id="labelGridCost" class="input-label block mt-3">Costo Energia da Rete (€/kWh)</label>
-                        <input type="number" id="cost" class="input-field" placeholder="es. 0,25" value="0.25" step="0.01">
-                    </div>
-                    <div>
-                        <label for="time" id="labelSimDuration" class="input-label block">Durata Simulazione (Ore)</label>
-                        <input type="number" id="time" class="input-field" placeholder="es. 24" value="24" min="1">
-                    </div>
-
-                    <!-- Sezione Fotovoltaico -->
-                    <div class="optional-section">
-                        <div class="flex items-center mb-2">
-                            <input type="checkbox" id="includePv" class="rounded">
-                            <label for="includePv" id="labelIncludePv" class="checkbox-label">Includi Impianto Fotovoltaico</label>
-                        </div>
-                        <div id="pvInputs" class="hidden space-y-3 pl-2">
-                            <div>
-                                <label for="pvPeakPower" id="labelPvPeakPower" class="input-label block">Potenza Picco Impianto FV (kWp)</label>
-                                <input type="number" id="pvPeakPower" class="input-field" placeholder="es. 3" value="3" step="0.1">
-                            </div>
-                            <div>
-                                <label for="geographicZone" id="labelGeoZone" class="input-label block">Paese / Regione</label>
-                                <select id="geographicZone" class="select-field">
-                                     <!-- Options will be populated by JS -->
-                                </select>
-                            </div>
-                            <div>
-                                <label for="season" id="labelSeason" class="input-label block">Stagione</label>
-                                <select id="season" class="select-field">
-                                    <!-- Options will be populated by JS -->
-                                </select>
-                            </div>
-                             <div>
-                                <label for="dayType" id="labelDayType" class="input-label block">Tipo di Giornata</label>
-                                <select id="dayType" class="select-field">
-                                    <!-- Options will be populated by JS -->
-                                </select>
-                            </div>
-                            <div class="flex items-center mt-1">
-                                <input type="checkbox" id="useSimulatedWeather" class="rounded">
-                                <label for="useSimulatedWeather" id="labelUseSimulatedWeather" class="checkbox-label text-xs">Usa Meteo Attuale (Simulato)</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sezione Batteria -->
-                    <div class="optional-section">
-                        <div class="flex items-center mb-2">
-                            <input type="checkbox" id="includeBattery" class="rounded">
-                            <label for="includeBattery" id="labelIncludeBattery" class="checkbox-label">Includi Batteria di Accumulo</label>
-                        </div>
-                        <div id="batteryInputs" class="hidden space-y-3 pl-2">
-                            <div>
-                                <label for="batteryCapacity" id="labelBatteryCapacity" class="input-label block">Capacità Batteria (kWh)</label>
-                                <input type="number" id="batteryCapacity" class="input-field" placeholder="es. 5" value="5" step="0.1">
-                            </div>
-                            <div>
-                                <label for="initialBatteryCharge" id="labelInitialBattery" class="input-label block">Carica Iniziale Batteria (%)</label>
-                                <input type="number" id="initialBatteryCharge" class="input-field" placeholder="es. 50" value="50" min="0" max="100">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <button id="calculateBtn" class="btn-primary w-full mt-6">Calcola</button>
-                <div id="errorMessage" class="hidden mt-4"></div>
-            </div>
-
-            <!-- Colonna Output e Grafico -->
-            <div class="lg:col-span-2">
-                <div class="card">
-                    <h2 id="resultsTitle" class="text-xl font-semibold text-gray-700 mb-4">Risultati Stimati</h2>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-                        <div class="text-center p-2 bg-gray-50 rounded-lg">
-                            <p id="energyConsumedDevice" class="output-value">--</p>
-                            <p id="labelDeviceConsumption" class="output-label">Consumo Dispositivo</p>
-                        </div>
-                        <div class="text-center p-2 bg-green-50 rounded-lg">
-                            <p id="energyFromPv" class="output-value">--</p>
-                            <p id="labelEnergyFromPv" class="output-label">Energia da FV</p>
-                        </div>
-                        <div class="text-center p-2 bg-blue-50 rounded-lg">
-                            <p id="energyFromBattery" class="output-value">--</p>
-                            <p id="labelEnergyFromBattery" class="output-label">Energia da Batteria</p>
-                        </div>
-                         <div class="text-center p-2 bg-orange-50 rounded-lg">
-                            <p id="energyToBattery" class="output-value">--</p>
-                            <p id="labelEnergyToBattery" class="output-label">Energia a Batteria</p>
-                        </div>
-                        <div class="text-center p-2 bg-red-50 rounded-lg">
-                            <p id="energyFromGrid" class="output-value">--</p>
-                            <p id="labelEnergyFromGrid" class="output-label">Prelievo da Rete</p>
-                        </div>
-                        <div class="text-center p-2 bg-purple-50 rounded-lg">
-                            <p id="totalCost" class="output-value">--</p>
-                            <p id="labelTotalGridCost" class="output-label">Costo Totale Rete</p>
-                        </div>
-                    </div>
-                     <p id="simulationNote" class="text-xs text-gray-500 mt-3 text-center">
-                        Nota: il consumo del dispositivo avviene solo nelle ore specificate e presenta fluttuazioni (5%). La produzione FV è stimata (con fluttuazioni dinamiche basate su zona/stagione/tipo giornata) considerando un ciclo giorno/notte.
-                    </p>
-                </div>
-
-                <div class="card mt-6 w-full">
-                    <h2 id="chartTitle" class="text-xl font-semibold text-gray-700 mb-4 text-center">Andamento Energetico Simulato</h2>
-                    <div class="relative h-72 sm:h-96">
-                        <canvas id="consumptionChart"></canvas>
-                    </div>
-                    <p id="chartMessage" class="text-sm text-gray-500 mt-4 text-center">Premi "Calcola" per generare il grafico.</p>
-                </div>
+            <div class="card">
+                <h2>Calcolatore Costi</h2>
+                <p>Calcola i costi energetici in modo semplice e veloce.</p>
+                <a href="cost-calculator.html">Vai al Calcolatore Costi</a>
             </div>
         </div>
-
-        <footer class="text-center mt-8 text-sm text-gray-500">
-            <p id="footerText">&copy; 2024 Calcolatore Energetico Avanzato. Solo a scopo illustrativo.</p>
-        </footer>
-    </div>
-
-    <script>
-        // --- DOM Elements ---
-        const languageSelector = document.getElementById('languageSelector');
-        const powerInput = document.getElementById('power');
-        const deviceStartHourInput = document.getElementById('deviceStartHour');
-        const deviceOperatingHoursInput = document.getElementById('deviceOperatingHours');
-        const costInput = document.getElementById('cost');
-        const timeInput = document.getElementById('time');
-        const includePvCheckbox = document.getElementById('includePv');
-        const pvInputsDiv = document.getElementById('pvInputs');
-        const pvPeakPowerInput = document.getElementById('pvPeakPower');
-        const seasonSelect = document.getElementById('season');
-        const geographicZoneSelect = document.getElementById('geographicZone');
-        const dayTypeSelect = document.getElementById('dayType');
-        const useSimulatedWeatherCheckbox = document.getElementById('useSimulatedWeather');
-        const includeBatteryCheckbox = document.getElementById('includeBattery');
-        const batteryInputsDiv = document.getElementById('batteryInputs');
-        const batteryCapacityInput = document.getElementById('batteryCapacity');
-        const initialBatteryChargeInput = document.getElementById('initialBatteryCharge');
-        const calculateBtn = document.getElementById('calculateBtn');
-        const energyConsumedDeviceOutput = document.getElementById('energyConsumedDevice');
-        const energyFromPvOutput = document.getElementById('energyFromPv');
-        const energyFromBatteryOutput = document.getElementById('energyFromBattery');
-        const energyToBatteryOutput = document.getElementById('energyToBattery');
-        const energyFromGridOutput = document.getElementById('energyFromGrid');
-        const totalCostOutput = document.getElementById('totalCost');
-        const consumptionChartCanvas = document.getElementById('consumptionChart');
-        const errorMessageDiv = document.getElementById('errorMessage');
-        const chartMessageP = document.getElementById('chartMessage');
-        
-        let consumptionChart = null;
-        let currentLang = 'it';
-
-        const translations = {
-            it: {
-                docTitle: "Calcolatore Costi Elettricità Avanzato",
-                mainTitle: "Calcolo Avanzato Consumi e Costi Elettricità",
-                subTitle: "Includi fotovoltaico e batteria per una stima più completa.",
-                dataInputTitle: "Inserisci i Dati",
-                labelDevicePower: "Consumo Medio Dispositivo (Watt, durante funzionamento)",
-                labelDeviceStartHour: "Ora Inizio Funzionamento Dispositivo (0-23)",
-                labelDeviceOpHours: "Durata Funzionamento Dispositivo (Ore)",
-                labelGridCost: "Costo Energia da Rete (€/kWh)",
-                labelSimDuration: "Durata Intera Simulazione (Ore)",
-                labelIncludePv: "Includi Impianto Fotovoltaico",
-                labelPvPeakPower: "Potenza Picco Impianto FV (kWp)",
-                labelSeason: "Stagione",
-                labelGeoZone: "Paese / Regione",
-                labelDayType: "Tipo di Giornata",
-                labelUseSimulatedWeather: "Usa Meteo Attuale (Simulato)",
-                labelIncludeBattery: "Includi Batteria di Accumulo",
-                labelBatteryCapacity: "Capacità Batteria (kWh)",
-                labelInitialBattery: "Carica Iniziale Batteria (%)",
-                calculateBtn: "Calcola",
-                resultsTitle: "Risultati Stimati",
-                labelDeviceConsumption: "Consumo Dispositivo",
-                labelEnergyFromPv: "Energia da FV",
-                labelEnergyFromBattery: "Energia da Batteria",
-                labelEnergyToBattery: "Energia a Batteria",
-                labelEnergyFromGrid: "Prelievo da Rete",
-                labelTotalGridCost: "Costo Totale Rete",
-                simulationNote: "Nota: il consumo del dispositivo avviene solo nelle ore specificate e presenta fluttuazioni (5%). La produzione FV è stimata (con fluttuazioni dinamiche basate su zona/stagione/tipo giornata) considerando un ciclo giorno/notte.",
-                chartTitle: "Andamento Energetico Simulato",
-                chartMessage: 'Premi "Calcola" per generare il grafico.',
-                footerText: "© 2024 Calcolatore Energetico Avanzato. Solo a scopo illustrativo.",
-                errorDevicePower: "Inserisci una potenza valida per il dispositivo (>0 Watt).",
-                errorDeviceStartHour: "Ora inizio funzionamento dispositivo non valida (0-23).",
-                errorDeviceOpHours: "Durata funzionamento dispositivo non valida (>0 ore).",
-                errorGridCost: "Inserisci un costo per kWh valido (>=0).",
-                errorSimDuration: "Inserisci una durata simulazione valida (>0 ore).",
-                errorPvPeakPower: "Inserisci una potenza di picco FV valida (>0 kWp).",
-                errorPvCombination: "Combinazione zona/stagione/tipo giornata non valida per FV.",
-                errorBatteryCapacity: "Inserisci una capacità batteria valida (>0 kWh).",
-                errorInitialBattery: "Inserisci una carica iniziale batteria valida (0-100%).",
-                chartLabelDeviceConsumption: "Consumo Dispositivo (W)",
-                chartLabelAvgDevicePower: "Potenza Media Dispositivo (W, se attivo)",
-                chartLabelGridDraw: "Prelievo da Rete (W)",
-                chartLabelPvProduction: "Produzione FV (W)",
-                chartLabelAvgPvProduction: "Produzione Media FV Attesa (W, su 24h)",
-                chartLabelBatteryCharge: "Carica Batteria (%)",
-                chartAxisPower: "Potenza (Watt)",
-                chartAxisBattery: "Carica Batteria (%)",
-                chartAxisDuration: "Durata (Ore)",
-                seasons: { inverno: "Inverno", mezzaStagione: "Primavera/Autunno", estate: "Estate" },
-                dayTypes: { sunny: "Soleggiata", partlyCloudy: "Parz. Nuvolosa", cloudy: "Nuvolosa/Pioggia" },
-                geoZones: {
-                    it_north: "Italia - Nord", it_center: "Italia - Centro", it_south: "Italia - Sud/Isole",
-                    de_north: "Germania - Nord", de_south: "Germania - Sud",
-                    es_south: "Spagna - Sud", fr_north: "Francia - Nord",
-                    uk_south: "Regno Unito - Sud",
-                    usa_ca: "USA - California", usa_ny: "USA - New York",
-                    eq_generic: "Zona Equatoriale Generica"
-                }
-            },
-            en: {
-                docTitle: "Advanced Electricity Cost Calculator",
-                mainTitle: "Advanced Electricity Consumption and Cost Calculator",
-                subTitle: "Include photovoltaics and battery for a more complete estimate.",
-                dataInputTitle: "Enter Your Data",
-                labelDevicePower: "Average Device Consumption (Watts, when ON)",
-                labelDeviceStartHour: "Device Operating Start Hour (0-23)",
-                labelDeviceOpHours: "Device Operating Duration (Hours)",
-                labelGridCost: "Grid Energy Cost (€/kWh)",
-                labelSimDuration: "Total Simulation Duration (Hours)",
-                labelIncludePv: "Include Photovoltaic System",
-                labelPvPeakPower: "PV System Peak Power (kWp)",
-                labelSeason: "Season",
-                labelGeoZone: "Country / Region",
-                labelDayType: "Day Type",
-                labelUseSimulatedWeather: "Use Current Weather (Simulated)",
-                labelIncludeBattery: "Include Storage Battery",
-                labelBatteryCapacity: "Battery Capacity (kWh)",
-                labelInitialBattery: "Initial Battery Charge (%)",
-                calculateBtn: "Calculate",
-                resultsTitle: "Estimated Results",
-                labelDeviceConsumption: "Device Consumption",
-                labelEnergyFromPv: "Energy from PV",
-                labelEnergyFromBattery: "Energy from Battery",
-                labelEnergyToBattery: "Energy to Battery",
-                labelEnergyFromGrid: "Grid Draw",
-                labelTotalGridCost: "Total Grid Cost",
-                simulationNote: "Note: Device consumption occurs only during specified hours and includes fluctuations (5%). PV production is estimated (with dynamic fluctuations based on zone/season/day type) considering a day/night cycle.",
-                chartTitle: "Simulated Energy Flow",
-                chartMessage: 'Press "Calculate" to generate the chart.',
-                footerText: "© 2024 Advanced Energy Calculator. For illustrative purposes only.",
-                errorDevicePower: "Enter a valid device power (>0 Watts).",
-                errorDeviceStartHour: "Invalid device start hour (0-23).",
-                errorDeviceOpHours: "Invalid device operating duration (>0 hours).",
-                errorGridCost: "Enter a valid cost per kWh (>=0).",
-                errorSimDuration: "Enter a valid simulation duration (>0 hours).",
-                errorPvPeakPower: "Enter a valid PV peak power (>0 kWp).",
-                errorPvCombination: "Invalid zone/season/day type combination for PV.",
-                errorBatteryCapacity: "Enter a valid battery capacity (>0 kWh).",
-                errorInitialBattery: "Enter a valid initial battery charge (0-100%).",
-                chartLabelDeviceConsumption: "Device Consumption (W)",
-                chartLabelAvgDevicePower: "Avg Device Power (W, if ON)",
-                chartLabelGridDraw: "Grid Draw (W)",
-                chartLabelPvProduction: "PV Production (W)",
-                chartLabelAvgPvProduction: "Avg Expected PV Production (W, 24h avg)",
-                chartLabelBatteryCharge: "Battery Charge (%)",
-                chartAxisPower: "Power (Watts)",
-                chartAxisBattery: "Battery Charge (%)",
-                chartAxisDuration: "Duration (Hours)",
-                seasons: { inverno: "Winter", mezzaStagione: "Spring/Autumn", estate: "Summer" },
-                dayTypes: { sunny: "Sunny", partlyCloudy: "Partly Cloudy", cloudy: "Cloudy/Rainy" },
-                geoZones: {
-                    it_north: "Italy - North", it_center: "Italy - Center", it_south: "Italy - South/Islands",
-                    de_north: "Germany - North", de_south: "Germany - South",
-                    es_south: "Spain - South", fr_north: "France - North",
-                    uk_south: "United Kingdom - South",
-                    usa_ca: "USA - California", usa_ny: "USA - New York",
-                    eq_generic: "Generic Equatorial Zone"
-                }
-            }
-        };
-        
-        // kWh/kWp/day for a TYPICALLY SUNNY DAY
-        const yieldFactors = { 
-            it_north: { inverno: 1.2, mezzaStagione: 3.0, estate: 4.8 },
-            it_center: { inverno: 1.8, mezzaStagione: 4.0, estate: 6.0 }, // User's reference
-            it_south: { inverno: 2.5, mezzaStagione: 4.8, estate: 7.0 },
-            de_north: { inverno: 0.8, mezzaStagione: 2.5, estate: 4.2 },
-            de_south: { inverno: 1.0, mezzaStagione: 3.0, estate: 4.8 },
-            es_south: { inverno: 2.8, mezzaStagione: 5.0, estate: 7.5 },
-            fr_north: { inverno: 1.0, mezzaStagione: 2.9, estate: 4.6 },
-            uk_south: { inverno: 0.9, mezzaStagione: 2.7, estate: 4.3 },
-            usa_ca:   { inverno: 3.0, mezzaStagione: 5.5, estate: 7.8 },
-            usa_ny:   { inverno: 1.5, mezzaStagione: 3.8, estate: 5.2 },
-            eq_generic:{ inverno: 4.2, mezzaStagione: 4.5, estate: 4.8 } // Less seasonal variation, more consistent
-        };
-        
-        // Defines daylight window and reference hours for calculating a higher power base for fluctuations
-        const seasonalDaylightAndPowerRefHours = {
-            inverno:       { start: 8, end: 17, refHoursForPowerCalc: 4 }, // Adjusted refHours
-            mezzaStagione: { start: 7, end: 19, refHoursForPowerCalc: 6 }, 
-            estate:        { start: 6, end: 20, refHoursForPowerCalc: 8 }  // Longer ref for summer
-        };
-
-        // +/- percentage range, relative to the curve generated for the day type
-        const pvBaseFluctuation = 0.10; // Base random noise on top of the shaped curve
-        const dayTypeModifiers = {
-            // Factor to multiply daily energy yield by, and base variability factor
-            sunny:         { yieldFactor: 1.0,  variabilityFactor: 0.15, shapeIntensity: 1.0 }, // Shape intensity for how "peaky"
-            partlyCloudy:  { yieldFactor: 0.6,  variabilityFactor: 0.40, shapeIntensity: 0.7 },
-            cloudy:        { yieldFactor: 0.25, variabilityFactor: 0.65, shapeIntensity: 0.4 }
-        };
-
-
-        function updateUI(lang) {
-            currentLang = lang;
-            document.documentElement.lang = lang;
-            const t = translations[lang];
-
-            document.title = t.docTitle;
-            document.getElementById('mainTitle').textContent = t.mainTitle;
-            document.getElementById('subTitle').textContent = t.subTitle;
-            document.getElementById('dataInputTitle').textContent = t.dataInputTitle;
-            document.getElementById('labelDevicePower').textContent = t.labelDevicePower;
-            document.getElementById('labelDeviceStartHour').textContent = t.labelDeviceStartHour;
-            document.getElementById('labelDeviceOpHours').textContent = t.labelDeviceOpHours;
-            document.getElementById('labelGridCost').textContent = t.labelGridCost;
-            document.getElementById('labelSimDuration').textContent = t.labelSimDuration;
-            document.getElementById('labelIncludePv').textContent = t.labelIncludePv;
-            document.getElementById('labelPvPeakPower').textContent = t.labelPvPeakPower;
-            document.getElementById('labelSeason').textContent = t.labelSeason;
-            document.getElementById('labelGeoZone').textContent = t.labelGeoZone;
-            document.getElementById('labelDayType').textContent = t.labelDayType;
-            document.getElementById('labelUseSimulatedWeather').textContent = t.labelUseSimulatedWeather;
-            document.getElementById('labelIncludeBattery').textContent = t.labelIncludeBattery;
-            document.getElementById('labelBatteryCapacity').textContent = t.labelBatteryCapacity;
-            document.getElementById('labelInitialBattery').textContent = t.labelInitialBattery;
-            calculateBtn.textContent = t.calculateBtn;
-            document.getElementById('resultsTitle').textContent = t.resultsTitle;
-            document.getElementById('labelDeviceConsumption').textContent = t.labelDeviceConsumption;
-            document.getElementById('labelEnergyFromPv').textContent = t.labelEnergyFromPv;
-            document.getElementById('labelEnergyFromBattery').textContent = t.labelEnergyFromBattery;
-            document.getElementById('labelEnergyToBattery').textContent = t.labelEnergyToBattery;
-            document.getElementById('labelEnergyFromGrid').textContent = t.labelEnergyFromGrid;
-            document.getElementById('labelTotalGridCost').textContent = t.labelTotalGridCost;
-            document.getElementById('simulationNote').textContent = t.simulationNote;
-            document.getElementById('chartTitle').textContent = t.chartTitle;
-            chartMessageP.textContent = t.chartMessage;
-            document.getElementById('footerText').textContent = t.footerText;
-
-            seasonSelect.innerHTML = '';
-            for (const key in t.seasons) {
-                const option = document.createElement('option'); option.value = key; option.textContent = t.seasons[key];
-                if (key === 'mezzaStagione') option.selected = true; seasonSelect.appendChild(option);
-            }
-            geographicZoneSelect.innerHTML = '';
-            for (const key in t.geoZones) {
-                const option = document.createElement('option'); option.value = key; option.textContent = t.geoZones[key];
-                // Default to Italy Center if available, else first
-                if (key === 'it_center' || (geographicZoneSelect.options.length === 0 && key === Object.keys(t.geoZones)[0])) option.selected = true;
-                geographicZoneSelect.appendChild(option);
-            }
-            dayTypeSelect.innerHTML = '';
-            for (const key in t.dayTypes) {
-                const option = document.createElement('option'); option.value = key; option.textContent = t.dayTypes[key];
-                if (key === 'sunny') option.selected = true; dayTypeSelect.appendChild(option);
-            }
-            if (consumptionChart) { calculateBtn.click(); }
-        }
-        
-        languageSelector.addEventListener('change', (event) => updateUI(event.target.value));
-        includePvCheckbox.addEventListener('change', () => {
-            pvInputsDiv.classList.toggle('hidden', !includePvCheckbox.checked);
-            if (!includePvCheckbox.checked) {
-                includeBatteryCheckbox.checked = false;
-                batteryInputsDiv.classList.add('hidden');
-            }
-        });
-        includeBatteryCheckbox.addEventListener('change', () => batteryInputsDiv.classList.toggle('hidden', !includeBatteryCheckbox.checked));
-
-        function displayError(messageKey, lang = currentLang) {
-            errorMessageDiv.textContent = translations[lang][messageKey] || messageKey;
-            errorMessageDiv.classList.remove('hidden');
-        }
-        function clearError() { errorMessageDiv.classList.add('hidden'); errorMessageDiv.textContent = ''; }
-        function formatEnergy(wh) {
-            if (wh === null || isNaN(wh)) return '--';
-            if (Math.abs(wh) < 1000) return wh.toFixed(1) + " Wh";
-            if (Math.abs(wh) < 1000000) return (wh / 1000).toFixed(2) + " kWh";
-            return (wh / 1000000).toFixed(3) + " MWh";
-        }
-        
-        calculateBtn.addEventListener('click', () => {
-            clearError();
-            chartMessageP.classList.add('hidden');
-            const t = translations[currentLang];
-
-            const powerDeviceAvgW = parseFloat(powerInput.value);
-            const deviceStartHour = parseInt(deviceStartHourInput.value, 10);
-            const deviceOpHours = parseFloat(deviceOperatingHoursInput.value);
-            const costPerKwh = parseFloat(costInput.value.replace(',', '.'));
-            const totalHours = parseFloat(timeInput.value);
-
-            let errors = [];
-            if (isNaN(powerDeviceAvgW) || powerDeviceAvgW <= 0) errors.push("errorDevicePower");
-            if (isNaN(deviceStartHour) || deviceStartHour < 0 || deviceStartHour > 23) errors.push("errorDeviceStartHour");
-            if (isNaN(deviceOpHours) || deviceOpHours <= 0 ) errors.push("errorDeviceOpHours");
-            if (isNaN(costPerKwh) || costPerKwh < 0) errors.push("errorGridCost");
-            if (isNaN(totalHours) || totalHours <= 0) errors.push("errorSimDuration");
-
-            const usePv = includePvCheckbox.checked;
-            let pvPeakPowerkWp = 0, season = seasonSelect.value, zone = geographicZoneSelect.value, dayType = dayTypeSelect.value;
-            let useSimWeather = useSimulatedWeatherCheckbox.checked;
-
-            let avgDailyPvEnergyWh_target_base = 0; 
-            let pvDaylightConfig = seasonalDaylightAndPowerRefHours[season] || seasonalDaylightAndPowerRefHours.mezzaStagione;
-            let currentDayTypeModifier = dayTypeModifiers[dayType] || dayTypeModifiers.sunny;
-            
-            if (usePv) {
-                pvPeakPowerkWp = parseFloat(pvPeakPowerInput.value);
-                if (isNaN(pvPeakPowerkWp) || pvPeakPowerkWp <= 0) errors.push("errorPvPeakPower");
-                
-                const currentYieldFactors = yieldFactors[zone];
-                if (currentYieldFactors && currentYieldFactors[season] !== undefined) {
-                    const selectedYieldFactor = currentYieldFactors[season];
-                    avgDailyPvEnergyWh_target_base = pvPeakPowerkWp * 1000 * selectedYieldFactor; // Energy for a sunny day
-                } else {
-                    errors.push("errorPvCombination");
-                }
-            }
-
-            const useBattery = includeBatteryCheckbox.checked;
-            let batteryCapacityKWh = 0, currentBatteryChargePercentage = 0;
-            let batteryMaxEnergyWh = 0, currentBatteryEnergyWh = 0;
-            if (useBattery) {
-                batteryCapacityKWh = parseFloat(batteryCapacityInput.value);
-                currentBatteryChargePercentage = parseFloat(initialBatteryChargeInput.value);
-                if (isNaN(batteryCapacityKWh) || batteryCapacityKWh <= 0) errors.push("errorBatteryCapacity");
-                if (isNaN(currentBatteryChargePercentage) || currentBatteryChargePercentage < 0 || currentBatteryChargePercentage > 100) errors.push("errorInitialBattery");
-                batteryMaxEnergyWh = batteryCapacityKWh * 1000;
-                currentBatteryEnergyWh = batteryMaxEnergyWh * (currentBatteryChargePercentage / 100);
-            }
-            
-            if (errors.length > 0) { displayError(errors[0]); return; }
-
-            const numberOfIntervals = Math.max(Math.ceil(totalHours * 4), 96); // Higher resolution for PV curve
-            const timePerIntervalHours = totalHours / numberOfIntervals;
-            const deviceFluctuationPercentage = 0.05; 
-
-            // Apply day type modifier to the target daily energy
-            let avgDailyPvEnergyWh_target_adjusted = avgDailyPvEnergyWh_target_base * currentDayTypeModifier.yieldFactor;
-
-            // Apply simulated weather modifier
-            if (usePv && useSimWeather) {
-                const weatherModifier = 0.8 + Math.random() * 0.4; // Random factor between 0.8 (-20%) and 1.2 (+20%)
-                avgDailyPvEnergyWh_target_adjusted *= weatherModifier;
-            }
-            
-            let pvPowerBaseForCurveShape = 0;
-            if (usePv && pvDaylightConfig.refHoursForPowerCalc > 0) {
-                 pvPowerBaseForCurveShape = avgDailyPvEnergyWh_target_adjusted / pvDaylightConfig.refHoursForPowerCalc;
-            }
-
-
-            let totalDeviceEnergyWh = 0, simulatedTotalPvEnergyWh_beforeScaling = 0, totalEnergyDrawnFromBatteryWh = 0;
-            let totalEnergyChargedToBatteryWh = 0, totalGridEnergyWh = 0;
-
-            const timeLabels = [], deviceConsumptionData = [], pvProductionData_raw = [], batteryChargeData = [], gridConsumptionData = [];
-            
-            // --- Simulation Loop (Phase 1: Calculate Raw PV Production based on curve shape) ---
-            for (let i = 0; i < numberOfIntervals; i++) {
-                const currentIntervalStartSimTime = i * timePerIntervalHours;
-                const currentHourOfDay = currentIntervalStartSimTime % 24; 
-                
-                let intervalPvPowerW_shaped = 0;
-                if (usePv) {
-                    if (currentHourOfDay >= pvDaylightConfig.start && currentHourOfDay < pvDaylightConfig.end) {
-                        // Bell-curve shaping (simplified sinusoidal)
-                        const hoursIntoDaylight = currentHourOfDay - pvDaylightConfig.start;
-                        const daylightDuration = pvDaylightConfig.end - pvDaylightConfig.start;
-                        const peakHour = pvDaylightConfig.start + daylightDuration / 2;
-                        
-                        // More pronounced peak for sunny days, flatter for cloudy
-                        let shapeFactor = Math.sin((Math.PI * hoursIntoDaylight) / daylightDuration);
-                        shapeFactor = Math.pow(shapeFactor, currentDayTypeModifier.shapeIntensity); // Sharpen/flatten peak
-
-                        intervalPvPowerW_shaped = pvPowerBaseForCurveShape * shapeFactor;
-                        
-                        // Add random fluctuation based on day type variability
-                        const randomFluctuation = (Math.random() * 2 - 1) * currentDayTypeModifier.variabilityFactor;
-                        intervalPvPowerW_shaped *= (1 + randomFluctuation);
-                        
-                        intervalPvPowerW_shaped = Math.max(0, Math.min(intervalPvPowerW_shaped, pvPeakPowerkWp * 1000));
-                    } else {
-                        intervalPvPowerW_shaped = 0; // Night time
-                    }
-                    const intervalPvEnergyWh = intervalPvPowerW_shaped * timePerIntervalHours;
-                    simulatedTotalPvEnergyWh_beforeScaling += intervalPvEnergyWh;
-                    pvProductionData_raw.push(intervalPvPowerW_shaped);
-                } else {
-                    pvProductionData_raw.push(0);
-                }
-            }
-
-            // --- PV Energy Reconciliation (Phase 2) ---
-            let pvScalingFactor = 1;
-            if (usePv && simulatedTotalPvEnergyWh_beforeScaling > 0.001) { // Avoid division by zero or tiny numbers
-                const numberOfSimulatedDays = totalHours / 24;
-                const targetTotalPvEnergyWh_forSimDuration = avgDailyPvEnergyWh_target_adjusted * numberOfSimulatedDays;
-                pvScalingFactor = targetTotalPvEnergyWh_forSimDuration / simulatedTotalPvEnergyWh_beforeScaling;
-            } else if (usePv && avgDailyPvEnergyWh_target_adjusted > 0) { // Target was >0 but simulated was 0
-                 pvScalingFactor = 0; 
-            }
-
-
-            const pvProductionData_scaled = pvProductionData_raw.map(p => Math.max(0, p * pvScalingFactor)); // Ensure no negative after scaling
-            let finalTotalPvEnergyWh = 0;
-            if(usePv) {
-                pvProductionData_scaled.forEach(power => {
-                    finalTotalPvEnergyWh += power * timePerIntervalHours;
-                });
-            }
-
-
-            // --- Simulation Loop (Phase 3: Device, Battery, Grid with Scaled PV) ---
-            // Reset totals for the main simulation pass
-            totalDeviceEnergyWh = 0;
-            totalGridEnergyWh = 0;
-            // totalEnergyDrawnFromBatteryWh and totalEnergyChargedToBatteryWh are reset implicitly by not accumulating from prev runs
-            // currentBatteryEnergyWh is reset to initial for each calculation run
-
-            if (useBattery) { // Reset battery for this simulation run
-                currentBatteryEnergyWh = batteryMaxEnergyWh * (currentBatteryChargePercentage / 100);
-                totalEnergyDrawnFromBatteryWh = 0; // Explicitly reset these for clarity
-                totalEnergyChargedToBatteryWh = 0;
-            }
-
-
-            for (let i = 0; i < numberOfIntervals; i++) {
-                const currentIntervalStartSimTime = i * timePerIntervalHours;
-                let intervalDevicePowerW = 0;
-                const intervalMidPoint = currentIntervalStartSimTime + timePerIntervalHours / 2;
-                let deviceIsActiveInThisInterval = false;
-
-                if (currentIntervalStartSimTime < totalHours) {
-                    for (let dayOffset = 0; ; dayOffset++) { // Loop through potential days
-                        const dayStartTimeOffset = dayOffset * 24;
-                        const currentDayDeviceStart = dayStartTimeOffset + deviceStartHour;
-                        const currentDayDeviceEnd = dayStartTimeOffset + deviceStartHour + deviceOpHours;
-
-                        if (currentDayDeviceStart >= totalHours) break; // This device cycle starts after simulation ends
-
-                        if (intervalMidPoint >= currentDayDeviceStart && intervalMidPoint < currentDayDeviceEnd) {
-                            deviceIsActiveInThisInterval = true;
-                            break; 
-                        }
-                        if (currentDayDeviceEnd > currentIntervalStartSimTime + totalHours + 24) break; // Optimization
-                    }
-                }
-
-                if (deviceIsActiveInThisInterval) {
-                     const deviceRandomFluctuation = (Math.random() * 2 - 1) * deviceFluctuationPercentage;
-                     intervalDevicePowerW = powerDeviceAvgW * (1 + deviceRandomFluctuation);
-                     intervalDevicePowerW = Math.max(0, intervalDevicePowerW);
-                }
-                const actualIntervalDeviceEnergyWh = intervalDevicePowerW * timePerIntervalHours;
-                totalDeviceEnergyWh += actualIntervalDeviceEnergyWh;
-                
-                const intervalPvPowerW_final = usePv ? pvProductionData_scaled[i] : 0;
-                const intervalPvEnergyWh_final = intervalPvPowerW_final * timePerIntervalHours;
-
-                let energyFromGridThisInterval = 0, energyFromBatteryThisInterval = 0, energyToBatteryThisInterval = 0;
-                let netAfterPv = actualIntervalDeviceEnergyWh - intervalPvEnergyWh_final; 
-
-                if (useBattery) {
-                    if (netAfterPv > 0) { 
-                        const canDrawFromBattery = Math.min(netAfterPv, currentBatteryEnergyWh);
-                        energyFromBatteryThisInterval = canDrawFromBattery;
-                        currentBatteryEnergyWh -= canDrawFromBattery;
-                        totalEnergyDrawnFromBatteryWh += canDrawFromBattery;
-                        energyFromGridThisInterval = netAfterPv - canDrawFromBattery; 
-                    } else { 
-                        const surplusPv = Math.abs(netAfterPv); 
-                        const canChargeToBattery = Math.min(surplusPv, batteryMaxEnergyWh - currentBatteryEnergyWh);
-                        energyToBatteryThisInterval = canChargeToBattery;
-                        currentBatteryEnergyWh += canChargeToBattery;
-                        totalEnergyChargedToBatteryWh += canChargeToBattery;
-                    }
-                } else { 
-                    if (netAfterPv > 0) energyFromGridThisInterval = netAfterPv;
-                }
-                
-                energyFromGridThisInterval = Math.max(0, energyFromGridThisInterval); 
-                totalGridEnergyWh += energyFromGridThisInterval;
-
-                timeLabels.push((currentIntervalStartSimTime).toFixed(1) + 'h');
-                deviceConsumptionData.push(intervalDevicePowerW.toFixed(1));
-                if(useBattery) batteryChargeData.push((currentBatteryEnergyWh / batteryMaxEnergyWh * 100).toFixed(1));
-                gridConsumptionData.push((energyFromGridThisInterval / timePerIntervalHours).toFixed(1));
-            }
-
-
-            const finalTotalCost = (totalGridEnergyWh / 1000) * costPerKwh;
-
-            energyConsumedDeviceOutput.textContent = formatEnergy(totalDeviceEnergyWh);
-            energyFromPvOutput.textContent = usePv ? formatEnergy(finalTotalPvEnergyWh) : '--'; 
-            energyFromBatteryOutput.textContent = useBattery ? formatEnergy(totalEnergyDrawnFromBatteryWh) : '--';
-            energyToBatteryOutput.textContent = useBattery ? formatEnergy(totalEnergyChargedToBatteryWh) : '--';
-            energyFromGridOutput.textContent = formatEnergy(totalGridEnergyWh);
-            totalCostOutput.textContent = finalTotalCost.toLocaleString(currentLang === 'it' ? 'it-IT' : 'en-US', { style: 'currency', currency: 'EUR' });
-
-            if (consumptionChart) consumptionChart.destroy();
-            const datasets = [
-                { label: t.chartLabelDeviceConsumption, data: deviceConsumptionData, borderColor: 'rgba(255, 99, 132, 1)', backgroundColor: 'rgba(255, 99, 132, 0.1)', tension: 0.3, fill: true, yAxisID: 'yPower' },
-                { label: t.chartLabelGridDraw, data: gridConsumptionData, borderColor: 'rgba(255, 159, 64, 1)', backgroundColor: 'rgba(255, 159, 64, 0.1)', tension: 0.3, fill: true, yAxisID: 'yPower' }
-            ];
-            if (usePv) {
-                datasets.push({ label: t.chartLabelPvProduction, data: pvProductionData_scaled.map(p => p.toFixed(1)), borderColor: 'rgba(75, 192, 192, 1)', backgroundColor: 'rgba(75, 192, 192, 0.1)', tension: 0.3, fill: true, yAxisID: 'yPower' });
-                datasets.push({ label: t.chartLabelAvgPvProduction, data: Array(numberOfIntervals).fill((avgDailyPvEnergyWh_target_adjusted/24).toFixed(1)), borderColor: 'rgba(75, 192, 192, 0.5)', borderDash: [3, 3], tension: 0.1, fill: false, pointRadius: 0, yAxisID: 'yPower' });
-            }
-            if (useBattery) {
-                 datasets.push({ label: t.chartLabelBatteryCharge, data: batteryChargeData, borderColor: 'rgba(54, 162, 235, 1)', backgroundColor: 'rgba(54, 162, 235, 0.1)', tension: 0.3, fill: false, yAxisID: 'yBattery' });
-            }
-
-            consumptionChart = new Chart(consumptionChartCanvas, {
-                type: 'line', data: { labels: timeLabels, datasets: datasets },
-                options: {
-                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, stacked: false,
-                    scales: {
-                        yPower: { type: 'linear', display: true, position: 'left', title: { display: true, text: t.chartAxisPower, font: {size: 12}, color: '#4a5568' }, grid: { color: '#e2e8f0' }, ticks: { color: '#718096'} },
-                        yBattery: { type: 'linear', display: useBattery, position: 'right', min: 0, max: 100, title: { display: true, text: t.chartAxisBattery, font: {size: 12}, color: '#4a5568' }, grid: { drawOnChartArea: false }, ticks: { color: '#718096'} },
-                        x: { title: { display: true, text: t.chartAxisDuration, font: {size: 14, weight: '500'}, color: '#4a5568' }, grid: { display: false }, ticks: { color: '#718096', maxRotation: 45, autoSkip: true, maxTicksLimit: 24 } }
-                    },
-                    plugins: {
-                        legend: { position: 'top', labels: { font: {size: 10}, color: '#4a5568'} },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) {
-                                        const unit = context.dataset.yAxisID === 'yBattery' ? ' %' : ' W';
-                                        label += parseFloat(context.parsed.y).toLocaleString(currentLang === 'it' ? 'it-IT' : 'en-US', {minimumFractionDigits:1, maximumFractionDigits:1}) + unit;
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    animation: { duration: 500, easing: 'easeInOutQuart' }
-                }
-            });
-        });
-        
-        updateUI(currentLang); 
-        chartMessageP.classList.remove('hidden');
-    </script>
+    </main>
 </body>
 </html>
