@@ -5,7 +5,7 @@ FROM nginx:stable-alpine
 RUN rm -rf /usr/share/nginx/html/*
 
 # Copy the web application files (your index.html) to the Nginx web root directory
-COPY index.html /usr/share/nginx/html/index.html
+COPY pages/ /usr/share/nginx/html/
 
 # Expose port 80 for HTTP traffic
 EXPOSE 80

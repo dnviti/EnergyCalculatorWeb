@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Energy Calculator - Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f0f4f8; 
+        }
+        .card { 
+            background-color: white; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); 
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+        }
+        .btn-primary { 
+            background-color: #4299e1; 
+            color: white; 
+            font-weight: 600; 
+            padding: 0.75rem 1.5rem; 
+            border-radius: 8px; 
+            transition: background-color 0.2s ease-in-out;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: auto; /* Aligns button to the bottom */
+        }
+        .btn-primary:hover { 
+            background-color: #3182ce; 
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Header Section -->
+    <header class="text-center py-8 bg-white shadow-md">
+        <h1 class="text-4xl font-bold text-gray-800">Energy Calculator Suite</h1>
+        <p class="text-gray-600 mt-2 text-lg">I tuoi strumenti per un'analisi energetica completa e consapevole.</p>
+    </header>
+    
+    <!-- Main Content with Cards -->
+    <main class="flex-grow flex items-center justify-center p-6">
+        <div class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- Card for Advanced Cost Calculator -->
+            <div class="card p-8 flex flex-col">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Calcolatore Costi Avanzato</h2>
+                <p class="text-gray-700 mb-6 flex-grow">
+                    Simula i consumi e i costi dell'elettricità. Include opzioni per analizzare l'impatto di un impianto fotovoltaico e di una batteria di accumulo per una stima precisa e dettagliata.
+                </p>
+                <a href="cost-calculator.html" class="btn-primary text-center">Vai al Calcolatore Costi</a>
+            </div>
+
+            <!-- Card for Photovoltaic Savings Calculator -->
+            <div class="card p-8 flex flex-col">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Calcolatore Risparmio Fotovoltaico</h2>
+                <p class="text-gray-700 mb-6 flex-grow">
+                    Analizza in dettaglio i costi, i risparmi e i possibili guadagni derivanti dall'installazione di un impianto fotovoltaico. Ottimo per valutare il tuo investimento.
+                </p>
+                <a href="savings-calculator.html" class="btn-primary text-center">Vai al Calcolatore Risparmi</a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="text-center py-6 text-sm text-gray-500 bg-white mt-8">
+        <p>&copy; 2024 Calcolatore Energetico Avanzato. Creato per scopi illustrativi.</p>
+    </footer>
+</body>
+</html>
