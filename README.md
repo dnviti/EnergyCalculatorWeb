@@ -1,119 +1,111 @@
-# **Calcolatore Costi Elettricità (Electricity Cost Calculator)**
+# **Energy Calculator Suite**
 
-Questo progetto è una semplice applicazione web per calcolare il costo stimato del consumo di elettricità. L'utente può inserire la potenza media di un dispositivo, il costo dell'energia per kWh e la durata di utilizzo. L'applicazione simula quindi un consumo leggermente randomizzato per fornire una stima più realistica e visualizza i risultati insieme a un grafico dell'andamento del consumo.
+This project is a web application that provides a suite of calculators for detailed energy analysis. It has been expanded from a simple cost calculator to a comprehensive tool for evaluating electricity costs, photovoltaic system savings, and overall energy consumption.
 
-## **✨ Caratteristiche Principali**
+---
 
-* **Input Utente:**  
-  * Potenza media del dispositivo (Watt)  
-  * Costo dell'energia per kWh (nella valuta locale)  
-  * Durata di utilizzo (Ore)  
-* **Calcolo e Output:**  
-  * Energia totale consumata (Wh, kWh o MWh, a seconda della scala)  
-  * Costo totale stimato  
-* **Simulazione Realistica:**  
-  * Introduce una leggera fluttuazione (±20%) sulla potenza media per simulare un consumo non lineare.  
-* **Visualizzazione Grafica:**  
-  * Un grafico a linee mostra l'andamento simulato della potenza consumata nel tempo.  
-  * Una linea aggiuntiva mostra la potenza media inserita per confronto.  
-* **Interfaccia Moderna:**  
-  * Realizzata con Tailwind CSS per un design pulito e responsivo.  
-* **Localizzazione:**  
-  * Interfaccia utente tradotta in italiano.  
-* **Containerizzazione:**  
-  * Dockerfile incluso per eseguire l'applicazione con Nginx.  
-* **Continuous Integration:**  
-  * Workflow GitHub Actions per buildare e pubblicare automaticamente l'immagine Docker su GitHub Container Registry (GHCR).
+## **✨ Key Features**
 
-## **🛠️ Tecnologie Utilizzate**
+The application is divided into two main calculators, accessible from the main page:
 
-* **Frontend:** HTML, CSS (Tailwind CSS), JavaScript  
-* **Grafici:** Chart.js  
-* **Web Server (in Docker):** Nginx  
-* **Containerizzazione:** Docker  
-* **Continuous Integration:** GitHub Actions
+### **1. Advanced Cost Calculator (`cost-calculator.html`)**
 
-## **🚀 Come Iniziare**
+This tool simulates electricity consumption and costs, with advanced options for modeling renewable energy sources and storage.
 
-### **Prerequisiti**
+* **Device Consumption Simulation**:
+    * Set the average power of a device (in Watts).
+    * Define the start time and duration of the device's operation within a 24-hour cycle.
+* **Photovoltaic (PV) System Simulation**:
+    * Include a PV system in the simulation by specifying its peak power (kWp).
+    * Select the **geographic area**, **season**, and **type of day** (sunny, cloudy, etc.) to get a realistic production estimate.
+    * Option to simulate with a randomized "current weather" factor.
+* **Battery Storage Simulation**:
+    * Add a storage battery to the system.
+    * Set the battery's **capacity** (kWh) and its **initial charge** (%).
+* **Detailed Results and Analysis**:
+    * Get a breakdown of energy consumption: from the grid, from the PV system, and from the battery.
+    * View the total estimated cost of electricity drawn from the grid.
+    * Visualize the simulated energy flows over time with an interactive chart showing device consumption, PV production, grid draw, and battery charge level.
+* **Multi-language Support**: The interface is available in **Italian** and **English**.
 
-* Un browser web moderno (es. Chrome, Firefox, Safari, Edge)  
-* [Docker](https://www.docker.com/get-started) (opzionale, per l'esecuzione tramite container)  
-* [Git](https://git-scm.com/) (opzionale, per clonare il repository)
+### **2. Photovoltaic Savings Calculator (`savings-calculator.html`)**
 
-### **Esecuzione Locale (Senza Docker)**
+This calculator is designed to analyze the economic viability of a photovoltaic system based on real consumption data.
 
-1. **Clona** il repository (opzionale):  
-   git clone \[https://github.com/dnviti/EnergyCalculatorWeb.git\](https://github.com/dnviti/EnergyCalculatorWeb.git)  
-   cd EnergyCalculatorWeb
+* **Economic Analysis**:
+    * Input your **total home consumption**, **consumption from the grid**, and **energy fed into the grid**.
+    * Set the purchase cost of electricity (€/kWh) and the selling price for the energy you feed into the grid.
+* **Specific Utility Management**:
+    * Add a list of specific electrical utilities (e.g., "Electric Car," "Night-time appliances") with their respective consumption to analyze their cost impact.
+    * **Group Management**: Save and load predefined groups of utilities to speed up repetitive analysis.
+* **Comprehensive Summaries**:
+    * **Economic Summary**: See a clear breakdown of costs from the grid, savings from self-consumption, earnings from selling energy, and the final economic balance.
+    * **Energy Summary**: Analyze the flow of energy in kWh, including self-consumed energy, energy from the grid, energy fed in, and total energy produced by the PV system.
+* **Visualizations**:
+    * Interactive bar charts show the breakdown of energy sources (grid vs. PV) and the impact of specific utilities on total consumption.
 
-   Oppure, scarica semplicemente il file index.html.  
-2. Apri il file index.html:  
-   Fai doppio clic sul file index.html o aprilo direttamente con il tuo browser web.
+---
 
-### **Esecuzione con Docker**
+## **🛠️ Technologies Used**
 
-1. **Assicurati che Docker sia in esecuzione.**  
-2. Costruisci l'immagine Docker:  
-   Naviga nella directory principale del progetto (dove si trova il Dockerfile) ed esegui:  
-   docker build \-t electricity-calculator-app .
+* **Frontend**: HTML, CSS (Tailwind CSS), JavaScript
+* **Charting**: Chart.js
+* **Web Server (in Docker)**: Nginx
+* **Containerization**: Docker
+* **Continuous Integration**: GitHub Actions
 
-3. **Esegui il container Docker:**  
-   docker run \-d \-p 8080:80 electricity-calculator-app
+---
 
-   * \-d esegue il container in background.  
-   * \-p 8080:80 mappa la porta 8080 del tuo computer alla porta 80 del container (dove Nginx è in ascolto). Puoi cambiare 8080 se necessario.  
-4. Accedi all'applicazione:  
-   Apri il tuo browser e vai a http://localhost:8080.
+## **🚀 How to Get Started**
 
-## **🐳 Immagine Docker**
+### **Prerequisites**
 
-L'applicazione può essere eseguita come un container Docker. Il Dockerfile utilizza un'immagine Nginx stable-alpine per servire il file index.html.
+* A modern web browser (e.g., Chrome, Firefox, Safari, Edge)
+* [Docker](https://www.docker.com/get-started) (optional, for running via container)
+* [Git](https://git-scm.com/) (optional, for cloning the repository)
 
-L'immagine Docker viene automaticamente buildata e pubblicata su GitHub Container Registry (GHCR) ad ogni push sul branch main.
+### **Local Execution (Without Docker)**
 
-**Pull dell'immagine da GHCR (esempio):**
+1.  **Clone** the repository (optional):
+    ```bash
+    git clone [https://github.com/dnviti/EnergyCalculatorWeb.git](https://github.com/dnviti/EnergyCalculatorWeb.git)
+    cd EnergyCalculatorWeb
+    ```
+    Alternatively, you can just download the project files.
+2.  Open the `pages/index.html` file in your web browser to access the main menu and navigate to the desired calculator.
 
+### **Execution with Docker**
+
+1.  **Make sure Docker is running.**
+2.  Build the Docker image. Navigate to the project's root directory and run:
+    ```bash
+    docker build -t energy-calculator-suite .
+    ```
+3.  **Run the Docker container**:
+    ```bash
+    docker run -d -p 8080:80 energy-calculator-suite
+    ```
+4.  **Access the application**: Open your browser and go to `http://localhost:8080`.
+
+---
+
+## **🐳 Docker Image**
+
+The application can be run as a Docker container. The `Dockerfile` uses a stable Nginx image to serve the static files. The image is automatically built and published to the GitHub Container Registry (GHCR) with every push to the `master` branch.
+
+**Pulling the image from GHCR:**
+```bash
 docker pull ghcr.io/dnviti/electricity-calculator-app:latest
+```
 
-(Sostituisci TUO\_USERNAME con il tuo nome utente o organizzazione GitHub)
+---
 
 ## **🔄 Continuous Integration (GitHub Actions)**
 
-Il file .github/workflows/docker-publish.yml definisce un workflow di GitHub Actions che:
+The `.github/workflows/docker-publish.yml` file defines a GitHub Actions workflow that automates the building and publishing of the Docker image to GHCR.
 
-1. Si attiva ad ogni push sul branch main o manualmente.  
-2. Effettua il checkout del codice.  
-3. Esegue il login a GitHub Container Registry.  
-4. Estrae metadati per i tag dell'immagine Docker.  
-5. Costruisce l'immagine Docker utilizzando il Dockerfile presente nel repository.  
-6. Pubblica l'immagine Docker su GHCR (ghcr.io/TUO\_USERNAME/electricity-calculator-app).
+---
 
-## **💻 Come Usare l'Applicazione Web**
+## **📄 License**
 
-1. Apri l'applicazione nel tuo browser.  
-2. Nel pannello "Inserisci i Dati":  
-   * Inserisci la **Potenza Media** del dispositivo in Watt.  
-   * Inserisci il **Costo per kWh** nella tua valuta (es. 0.25).  
-   * Inserisci la **Durata** di utilizzo in ore.  
-3. Clicca sul pulsante **"Calcola"**.  
-4. I risultati appariranno nel pannello "Risultati Stimati":  
-   * **Energia Totale Consumata**.  
-   * **Costo Totale Stimato**.  
-5. Il grafico "Andamento del Consumo Energetico Simulato" mostrerà la variazione simulata della potenza nel tempo.
-
-## **🤝 Contributi**
-
-I contributi sono benvenuti\! Se hai suggerimenti o miglioramenti, sentiti libero di aprire una issue o una pull request.
-
-1. Forka il Progetto  
-2. Crea il tuo Branch per la Feature (git checkout \-b feature/AmazingFeature)  
-3. Committa le tue Modifiche (git commit \-m 'Add some AmazingFeature')  
-4. Pusha sul Branch (git push origin feature/AmazingFeature)  
-5. Apri una Pull Request
-
-## **📄 Licenza**
-
-Distribuito sotto la Licenza MIT. Vedi LICENSE.txt per maggiori informazioni (se presente, altrimenti si assume MIT).
-
-*Questo README è stato generato per il progetto Calcolatore Costi Elettricità.*
+Distributed under the MIT License.
